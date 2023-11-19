@@ -1,14 +1,38 @@
-import { useEffect, useState } from 'react';
-import { loadCaptchaEnginge, LoadCanvasTemplate, LoadCanvasTemplateNoReload, validateCaptcha } from 'react-simple-captcha';
+import { useContext, useEffect, useState } from 'react';
+import { loadCaptchaEnginge, LoadCanvasTemplate, validateCaptcha } from 'react-simple-captcha';
+import { AuthContext } from '../../Providers/AuthProviders';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import SocialLogin from '../../socialLogin/SocialLogin';
 
 const Login = () => {
     const [disabled, setDisabled] = useState(true);
+    const { signIn } = useContext(AuthContext);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const from = location.state?.from?.pathname || "/";
+
    const handleLogin = event =>{
     event.preventDefault();
     const form = event.target;
     const email = form.email.value;
     const password = form.password.value;
     console.log(email, password);
+    signIn(email, password)
+    .then(result => {
+        const user = result.user;
+        console.log(user);
+        Swal.fire({
+            title: 'User Login Successful.',
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp'
+            }
+        });
+        navigate(from, { replace: true });
+    })
    }
 
   useEffect(()=>{
@@ -60,6 +84,8 @@ const Login = () => {
                
                 <input disabled={disabled} className="btn btn-primary" type="submit" value="login" />
               </div>
+              <p><small>New Here? <Link to="/signup">Create an account</Link> </small></p>
+              <SocialLogin></SocialLogin>
             </form>
           </div>
         </div>
